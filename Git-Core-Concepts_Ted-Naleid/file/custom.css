@@ -1,0 +1,91 @@
+.slide {
+    background-color: #444;
+}
+
+.content {
+  font-size: 90%;
+  color: #bbb;
+  font-family: kefa, helvetica neue, helvetica;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.content p {
+    font-size:350%;
+    line-height: 105%;
+}
+
+a {
+    color:lightgreen;
+
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: kefa, futura, arial; 
+  text-align: center;
+}
+
+h1 {
+    color: orange;
+}
+
+.danger {
+    color: orangered;
+}
+
+.small {
+    font-size: 200%;
+}
+
+.centered {
+    text-align: center;
+}
+
+.smallercentered {
+    padding: 20px;
+    font-size: 200%;
+    text-align: center;
+}
+
+
+.smallestcentered {
+    padding: 20px;
+    font-size: 120%;
+    text-align: center;
+}
+
+.shovedown {
+    margin-top: 200px;
+}
+
+code {
+    color: lightgreen;
+    border: 1px solid #EAEAEA;
+    background-color: #777777;
+    padding: 3px;
+}
+
+.content > pre {
+    font-size: 200%;
+    color: lightgreen;
+    border: 1px solid #EAEAEA;
+    background-color: #777777;
+    padding: 10px;
+}
+
+.ascii-art {
+    text-align: left;
+}
+
+.commandline code.command {
+    color: #eee;
+}
+
+.commandline code.result {
+    color: #fff;
+}
+
+li {
+    font-size: 75%;
+    padding-top: 10px;
+}
