@@ -1,0 +1,1220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <title>Git Core Concepts</title>
+
+  <meta name="viewport" content="width=device-width"/>
+
+  <link rel="stylesheet" href="./css/reset.css" type="text/css"/>
+  <link rel="stylesheet" href="./css/showoff.css" type="text/css"/>
+
+  <script type="text/javascript" src="./js/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="./js/jquery.cycle.all.js"></script>
+	<script type="text/javascript" src="./js/jquery-print.js"></script>
+  <script type="text/javascript" src="./js/jquery.batchImageLoad.js"></script>
+
+  <script type="text/javascript" src="./js/jquery.doubletap-0.1.js"></script>
+
+  <script type="text/javascript" src="./js/fg.menu.js"></script>
+  <script type="text/javascript" src="./js/showoff.js"></script>
+  <script type="text/javascript" src="./js/jTypeWriter.js"> </script>
+  <script type="text/javascript" src="./js/sh_main.min.js"></script>
+  <script type="text/javascript" src="./js/core.js"></script>
+  <script type="text/javascript" src="./js/showoffcore.js"></script>
+  <script type="text/javascript" src="./js/coffee-script.js"></script>
+
+  <link type="text/css" href="./css/fg.menu.css" media="screen" rel="stylesheet" />
+  <link type="text/css" href="./css/theme/ui.all.css" media="screen" rel="stylesheet" />
+  <link type="text/css" href="./css/sh_style.css" rel="stylesheet" >
+
+  
+    <link rel="stylesheet" href="file/custom.css" type="text/css"/>
+  
+
+  
+
+  <script type="text/javascript">
+  $(function(){
+      setupPreso(false, './');
+  });
+  </script>
+
+</head>
+
+<body>
+
+<a tabindex="0" href="#search-engines" class="fg-button fg-button-icon-right ui-widget ui-state-default ui-corner-all" id="navmenu"><span class="ui-icon ui-icon-triangle-1-s"></span>slides</a>
+<div id="navigation" class="hidden"></div>
+
+<div id="help">
+  <table>
+    <tr><td class="key">z, ?</td><td>toggle help (this)</td></tr>
+    <tr><td class="key">space, &rarr;</td><td>next slide</td></tr>
+    <tr><td class="key">shift-space, &larr;</td><td>previous slide</td></tr>
+    <tr><td class="key">d</td><td>toggle debug mode</td></tr>
+    <tr><td class="key">## &lt;ret&gt;</td><td>go to slide #</td></tr>
+    <tr><td class="key">c, t</td><td>table of contents (vi)</td></tr>
+    <tr><td class="key">f</td><td>toggle footer</td></tr>
+    <tr><td class="key">r</td><td>reload slides</td></tr>
+    <tr><td class="key">n</td><td>toggle notes</td></tr>
+    <tr><td class="key">p</td><td>run preshow</td></tr>
+  </table>
+</div>
+
+<div class="buttonNav">
+  <input type="submit" onClick="prevStep();" value="prev"/>
+  <input type="submit" onClick="nextStep();" value="next"/>
+</div>
+
+<div id="preso">loading presentation...</div>
+<div id="footer">
+  <span id="slideInfo"></span>
+  <span id="debugInfo"></span>
+  <span id="notesInfo"></span>
+</div>
+
+<div id="slides" class="offscreen" style="display:none;">
+<div class="slide" data-transition="none"><div class="content" ref="one/01_slide/1">
+<h1>Git Core Concepts</h1>
+
+<div class="smallercentered">
+or: how I learned to stop worrying and love the reflog
+</div>
+
+
+<h3>by <a href="http://naleid.com">Ted Naleid</a></h3>
+
+<div class="smallestcentered shovedown">
+Presentation: <a href="http://tednaleid.github.com/showoff-git-core-concepts">tednaleid.github.com/showoff-git-core-concepts</a> 
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/2">
+<h1>tl;dr</h1>
+
+<p>rewriting history is a lie</p>
+
+<p>git commits are immutable and cannot be &#x201C;rewritten&#x201D;</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/3">
+<h1>tl;dr</h1>
+
+<p>you only add to history</p>
+
+<p>garbage collection removes unwanted commits weeks later</p></div>
+</div><div class="slide" data-transition="none"><div class="content center" ref="one/01_slide/4">
+<h1>git is the safest VCS I know</h1>
+
+<pre class="ascii-art">
+
+              ____
+              \   \__       ____
+               \   \/_______\___\_________
+                \/_/   o o o o o o o o o  `-..
+                 `-----------/~~~~/----------'
+                            /____/
+
+
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content center" ref="one/01_slide/5">
+<h1>if you know a few concepts</h1></div>
+</div><div class="slide" data-transition="none"><div class="content center" ref="one/01_slide/6">
+<h1>if you don't&#x2026;it gets ugly fast</h1>
+
+<pre class="ascii-art">
+
+                     __.-^^---....,,-,
+                  _--                 \--_
+                 (                       ^)
+                 (                         )
+                  \._                   _./
+                     ``---\ ! ! , /---''
+                           |  |  |
+                        .--| ! ! |--.
+                        `==#######=='
+                           | !  !|
+                        ,-#########~,._
+
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/7">
+<p>git doesn't help by having a <em>terrible</em> user interface</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/8">
+<p>git mislabels things in confusing ways</p>
+
+<div class="small centered">
+    ex: git branches aren't branches
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/9">
+<p>git has hundreds of commands, but commonly used ones require extra parameters</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/10">
+<p>git uses dangerous-sounding terms:</p>
+
+<div class="centered smaller">
+<p>&#x201C;rewrite history&#x201D;</p>
+
+<p>rebase</p> 
+
+<p>reset --hard HEAD</p>
+
+<p>squash</p>
+
+<p>fast-forward</p>
+
+<p>reflog</p>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/11">
+<p>throw away your preconceptions from other version control systems</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/12">
+<h1>Git Core Concepts</h1></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/13">
+<p>git is a DAG (directed acyclic graph)</p>
+
+<pre>
+                      E---F---G 
+                     /
+                A---B---C---D-----------K---L---M 
+                             \         /
+                              H---I---J
+                                           
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/14">
+<p>DAG nodes each represent a commit</p>
+
+<pre>
+                      E---F---G 
+                     /
+                A---B---C---D-----------K---L---M 
+                             \         /
+                              H---I---J
+                                           
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/15">
+<p>A commit is identified by a unique SHA</p>
+
+<pre>
+% cat .git/refs/heads/master                  
+f643986c985998abd74076afe0247c81e0399512
+
+% git cat-file -p f643986 
+tree 392739b5a3de25773c163ae91191d3360811d302
+parent 94381141d087e9354b34ae76d2ab064a39b1cc69
+author Ted Naleid &lt;contact@naleid.com&gt; 1343694118 -0500
+committer Ted Naleid &lt;contact@naleid.com&gt; 1343698088 -0500
+
+adding _amazing_ ascii art
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/16">
+<p>commits are completely immutable and are <em>impossible</em> to accidentally destroy with git commands</p>
+
+<div class="smallercentered">
+you can still <code>rm -rf yourrepo</code> and lose anything not yet pushed out
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/17">
+<p>uncommitted work is easily destroyed, so commit early &amp; often</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/18">
+<p>you cannot modify commits, only add new ones</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/19">
+<p>garbage collection is the only truly destructive git action</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/20">
+<p>garbage collection only destroys commits with <em>nothing</em> pointing at them</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/21">
+<h1>what points at commits?</h1>
+
+<p>child commits</p>
+
+<p>tags</p>
+
+<p>branches</p>
+
+<p>the reflog</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/22">
+<h1>child commits</h1>
+
+<p>point at 1..N parent commits</p>
+
+<pre>
+                              E---F---G 
+                             /
+                        A---B---C---D 
+</pre>
+
+
+
+
+<div class="smallercentered">
+most commonly 1 or 2 parent commits
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/23">
+<h1>tags</h1>
+
+<p>fixed pointers</p>
+
+<pre>
+                        A---B---C 
+                                &#x2191;
+                           release_1.0
+</pre>
+
+
+
+
+<pre>
+% git commit -m "adding stuff to C"
+</pre>
+
+
+
+
+<pre>
+                        A---B---C---D 
+                                &#x2191;
+                           release_1.0
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/24">
+<h1>branches</h1>
+
+<p>floating pointers that move on commit</p>
+
+<pre>
+                        A---B
+                            &#x2191;
+                          master
+</pre>
+
+
+
+
+<pre>
+% git commit -m "adding stuff to B"
+</pre>
+
+
+
+
+<pre>
+                        A---B---C
+                                &#x2191;
+                              master
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/25">
+<h1>branches</h1>
+
+<p>they're just pointers, and are easy to move if you don't like where they are at</p>
+
+<pre>
+                        A---B---C
+                                &#x2191;
+                              master
+</pre>
+
+
+
+
+<pre>
+% git reset --hard SHA_OF_B
+</pre>
+
+
+
+
+<pre>
+                        A---B---C
+                            &#x2191;
+                          master
+</pre>
+
+
+
+
+<div class="smallercentered">
+commit <code>C</code> still exists and was not harmed by moving the pointer
+</div>
+
+
+<div class="smallestcentered">
+we'll talk more about <code>reset</code> in a bit
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/26">
+<h1>remote branches</h1>
+
+<p>&#x201C;remote&#x201D; branches are just pointers in your local repo</p>
+
+<pre>
+                              origin/master
+                                    &#x2193;
+                    A---B---C---D---E
+                            &#x2191;       
+                          master    
+</pre>
+
+
+
+
+<div class="smallercentered">
+for most commands, there's nothing remote about them...they're just moved on a <code>fetch</code> or <code>pull</code>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/27">
+<h1>branches</h1>
+
+<p>just text files in <code>.git/refs/heads</code> (local) and <code>.git/refs/remotes</code> (remote)</p>
+
+<pre>
+% ls -1 .git/refs/heads/**/*
+.git/refs/heads/master
+.git/refs/heads/my_feature_branch
+</pre>
+
+
+
+
+<pre>
+% ls -1 .git/refs/remotes/**/*  
+.git/refs/remotes/origin/HEAD
+.git/refs/remotes/origin/master
+.git/refs/remotes/origin/my_feature_branch
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/28">
+<h1>branches</h1>
+
+<p>branch text file contains is the SHA of the commit it's pointing at</p>
+
+<pre>
+% cat .git/refs/heads/master 
+0981e8c8ffbd3a1277dda1173fb6f5cbf4750d51
+</pre>
+
+
+
+
+<pre>
+% git cat-file -p 0981e8c8ffbd3a1277dda1173fb6f5cbf4750d51
+tree 4fd7894316b4659ef3f53426166697858d51a291
+parent e324971ecf1e0f626d4ba8b0adfc22465091c100
+parent d33700dde6d38b051ba240ee97d685afdaf07515
+author Ted Naleid &lt;contact@naleid.com&gt; 1328567163 -0800
+committer Ted Naleid &lt;contact@naleid.com&gt; 1328567163 -0800
+
+merge commit of two branches
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/29">
+<h1>branches</h1>
+
+<p>commits don't &#x201C;belong to&#x201D; branches, there's nothing in the commit metadata about branches</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/30">
+<h1>branches</h1>
+
+<p>a branch's commits are implied by the ancestry of the commit the branch points at</p>
+
+<pre>
+                                   feature
+                                      &#x2193;
+                              E---F---G 
+                             /
+                        A---B---C---D 
+                                    &#x2191; 
+                                  master
+</pre>
+
+
+
+
+<div class="smallercentered">
+<code>master</code> is <code>A-B-C-D</code> and <code>feature</code> is <code>A-B-E-F-G</code>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/31">
+<h1>HEAD</h1>
+
+<p><code>HEAD</code> is the active commit that will be the parent of the next commit</p>
+
+<pre>
+% cat .git/HEAD
+ref: refs/heads/master
+</pre>
+
+
+
+
+<div class="smallercentered">
+most of the time it points to a branch, but can point directly to a SHA when &#x201C;detached&#x201D;
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/32">
+<h1>the reflog</h1>
+
+<p>a log of recent <code>HEAD</code> movement</p>
+
+<pre>
+% git reflog                                       
+d72efc4 HEAD@{0}: commit: adding bar.txt
+6435f38 HEAD@{1}: commit (initial): adding foo.txt
+</pre>
+
+
+
+
+<pre>
+% git commit -m "adding baz.txt"
+</pre>
+
+
+
+
+<pre>
+% git reflog                                       
+b5416cb HEAD@{0}: commit: adding baz.txt
+d72efc4 HEAD@{1}: commit: adding bar.txt
+6435f38 HEAD@{2}: commit (initial): adding foo.txt
+</pre>
+
+
+
+
+<div class="smallercentered">
+by default it contains up to two weeks of history
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/33">
+<h1>the reflog</h1>
+
+<p>unique to a repository instance</p>
+
+<p>a garbage collected commit can still exist in a clone</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/34">
+<h1>dangling commit</h1>
+
+<p>if the only thing pointing to a commit is the reflog, it's &#x201C;dangling&#x201D;</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/35">
+<h1>dangling commit</h1>
+
+<pre>
+                    A---B---C---D---E---F
+                                        &#x2191;
+                                      master
+</pre>
+
+
+
+
+<pre>
+% git reset --hard SHA_OF_B
+</pre>
+
+
+
+
+<pre>
+                    A---B---C---D---E---F
+                        &#x2191;
+                      master
+
+</pre>
+
+
+
+
+<div class="smallercentered">
+<code>C..F</code> are now dangling
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/36">
+<h1>dangling commit</h1>
+
+<p>but they will be safe for ~2 weeks because of the reflog</p>
+
+<pre>
+                                     HEAD@{1}
+                                        &#x2193;
+                    A---B---C---D---E---F
+                        &#x2191;
+                     master (also HEAD@{0})
+
+</pre>
+
+
+
+
+<div class="smallercentered">
+<code>HEAD@{1}</code> will become <code>HEAD@{2}</code>..<code>HEAD@{N}</code> as refs are added to the reflog
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/37">
+<h1>garbage collection</h1>
+
+<p>once a dangling commit leaves the reflog, it is &#x201C;loose&#x201D; and is at risk of garbage collection</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/38">
+<h1>garbage collection</h1>
+
+<p>git does a <code>gc</code> when the number of &#x201C;loose&#x201D; objects hits a threshold</p>
+
+<div class="smallestcentered">
+something like every 1000 commits 
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/39">
+<h1>garbage collection</h1>
+
+<p>to prevent garbage collecting a commit, just point something at it</p>
+
+<pre>
+% git tag mytag SHA_OF_DANGLING_COMMIT
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/40">
+<p>you should have courage to experiment</p>
+
+<p>you have <em>weeks</em> to retrieve prior commits if something doesn't work</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/41">
+<h1>the index</h1>
+
+<p>a pre-commit staging area</p>
+
+<div class="smallercentered">
+    <code>git add .</code> puts all changes in the index ready for commit
+</div>
+
+
+
+
+<div class="smallestcentered">
+    some users bypass the index and commit directly with <code>git commit -a -m "msg"</code>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/42">
+<h1>Git Command Tips</h1></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/43">
+<h1>reset --soft</h1>
+
+<ol>
+<li>moves <code>HEAD</code> &amp; the current branch to the specified <code>&lt;SHA&gt;</code></li>
+<li>index - unchanged</li>
+<li>working directory - unchanged</li>
+</ol>
+
+
+<pre>
+                    A---B---C---D---E
+                                    &#x2191;
+                                  master
+</pre>
+
+
+<pre>
+git reset --soft SHA_OF_C
+</pre>
+
+
+<pre>
+                    working dir &amp; index still look like
+                                    &#x2193;
+                    A---B---C---D---E
+                            &#x2191;
+                          master
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/44">
+<h1>reset --soft</h1>
+
+<p>useful for squashing the last few messy commits into one pristine commit</p>
+
+<pre>
+                    working dir &amp; index still look like
+                                    &#x2193;
+                    A---B---C---D---E
+                            &#x2191;
+                          master
+</pre>
+
+
+
+
+<pre>
+git commit -m "perfect code on the 'first' try"
+</pre>
+
+
+
+
+<pre>
+                    A---B---C---E'
+                                &#x2191;
+                              master
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/45">
+<h1>reset (default)</h1>
+
+<pre>
+git reset [--mixed] &lt;SHA&gt;
+</pre>
+
+
+<ol>
+<li>moves <code>HEAD</code> &amp; the current branch to the specified <code>&lt;SHA&gt;</code></li>
+<li>clean the index, make it look like <code>&lt;SHA&gt;</code></li>
+<li>working directory - unchanged</li>
+</ol>
+
+
+<div class="smallercentered">
+<code>git reset HEAD</code> will unstage everything in the index
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/46">
+<h1>reset --hard</h1>
+
+<pre>
+git reset --hard &lt;SHA&gt;
+</pre>
+
+
+<ol>
+<li>moves <code>HEAD</code> &amp; the current branch to the specified <code>&lt;SHA&gt;</code></li>
+<li>clean the index, make it look like <code>&lt;SHA&gt;</code></li>
+<li>clean the working copy, make it look like <code>&lt;SHA&gt;</code></li>
+</ol>
+
+
+<p><p/>
+<div class="smallercentered">
+<span class="danger">dangerous</span> if you have <span class="danger">uncommitted work</span>, useful for undoing bad commits
+</div></p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/47">
+<h1>reset --hard HEAD</h1>
+
+<pre>
+git reset --hard HEAD
+</pre>
+
+
+
+
+<div class="smallercentered">
+just means clean out the working directory and any staged information, don't move the branch pointer
+</div>
+
+
+
+
+<div class="smallestcentered">
+for more info on <code>reset</code>, see: <a href="http://progit.org/2011/07/11/reset.html">http://progit.org/2011/07/11/reset.html</a>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/48">
+<h1>commit --amend</h1>
+
+<p>redo the last commit</p>
+
+<pre>
+                        A---B---C
+                                &#x2191;    
+                            master+HEAD
+</pre>
+
+
+
+
+<pre>
+&lt;... change some files ... &gt;
+git commit --amend -m "New commit message"
+</pre>
+
+
+<pre>
+                         master+HEAD
+                              &#x2193;
+                              C'
+                             /
+                        A---B---C
+                                &#x2191;    
+                  (dangling but still in reflog)
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/49">
+<h1>recovering commits</h1>
+
+<div class="smallercentered">
+Oops, I really wanted <code>C</code>!
+</div>
+
+
+<pre>
+                         master+HEAD
+                              &#x2193;
+                              C'
+                             /
+                        A---B---C
+                                &#x2191;    
+                            (dangling)
+</pre>
+
+
+<pre>
+git reflog  # find SHA_OF_C 
+git reset --hard SHA_OF_C
+</pre>
+
+
+<pre>
+                         (dangling)
+                              &#x2193;
+                              C'
+                             /
+                        A---B---C
+                                &#x2191;    
+                            master+HEAD
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/50">
+<h1>rebasing</h1>
+
+<p>reapplies a series of commits to a new parent commit</p>
+
+<p>then moves the current branch pointer</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/51">
+<h1>rebasing</h1>
+
+<pre>
+                                feature+HEAD
+                                      &#x2193;
+                              E---F---G 
+                             /
+                        A---B---C---D 
+                                    &#x2191; 
+                                  master
+</pre>
+
+
+
+
+<pre>
+   git rebase master
+</pre>
+
+
+
+
+<pre>
+                        (dangling but still in reflog)
+                                      &#x2193;
+                              E---F---G
+                             /
+                        A---B---C---D---E'--F'--G'
+                                    &#x2191;           &#x2191; 
+                                  master  feature+HEAD
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/52">
+<h1>rebasing</h1>
+
+<p>a private activity, should never be done with commits that have been pushed</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/53">
+<h1>rebasing</h1>
+
+<p>rebasing public commits is bad because it creates redundant commits with new SHAs</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/54">
+<h1>rebasing</h1>
+
+<p>if you want to clean things up, an alternative is to create another branch, rebase onto that and push it out</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/55">
+<h1>squashing</h1>
+
+<p>compresses N commits into one commit that's appended to a destination branch</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/56">
+<h1>squashing</h1>
+
+<pre>
+                                           feature
+                                              &#x2193;
+                                      E---F---G 
+                                     /
+                        A---B---C---D 
+                                    &#x2191; 
+                               master+HEAD
+</pre>
+
+
+
+
+<pre>
+git merge --squash feature
+</pre>
+
+
+
+
+<pre>
+                                           feature
+                                              &#x2193;
+                                      E---F---G 
+                                     /
+                        A---B---C---D---G' 
+                                        &#x2191; 
+                                   master+HEAD
+</pre>
+
+
+
+
+<div class="smallestcentered">
+squashing is used to clean up history, when the thinking behind <code>E..F</code> is unimportant
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/57">
+<h1>cherry picking</h1>
+
+<p>apply a subset of changes from another branch</p>
+
+<pre>
+                              E---F---G 
+                             /
+                        A---B---C---D 
+                                    &#x2191; 
+                               master+HEAD
+</pre>
+
+
+
+
+<pre>
+git cherry-pick SHA_OF_F
+</pre>
+
+
+
+
+<pre>
+                              E---F---G 
+                             /
+                        A---B---C---D---F' 
+                                        &#x2191; 
+                                   master+HEAD
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/58">
+<h1>fetch</h1>
+
+<p>download new commits and update the remote branch pointer</p>
+
+<p>does not move any local references</p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/59">
+<h1>fetch</h1>
+
+<pre>
+                     A---B---E---F   
+(origin)                         &#x2191; 
+                              master (local ref in remote repo)  
+
+
+                   origin/master
+                         &#x2193;
+(local)              A---B---C---D 
+                                 &#x2191; 
+                              master+HEAD
+</pre>
+
+
+
+
+<pre>
+% git fetch
+</pre>
+
+
+
+
+<pre>
+                         origin/master
+                               &#x2193;
+                           E---F
+                          /
+(local)              A---B---C---D 
+                                 &#x2191; 
+                              master+HEAD
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/60">
+<h1>pull</h1>
+
+<p><code>pull</code> is <code>fetch</code> plus <code>merge</code></p></div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/61">
+<h1>pull</h1>
+
+<pre>
+                     A---B---E---F   
+(origin)                         &#x2191; 
+                              master (local ref in remote repo)  
+
+
+                   origin/master
+                         &#x2193;
+(local)              A---B---C---D 
+                                 &#x2191; 
+                              master+HEAD
+</pre>
+
+
+
+
+<pre>
+% git pull
+</pre>
+
+
+
+
+<pre>
+                         origin/master
+                               &#x2193;
+                           E---F----
+                          /         \
+(local)              A---B---C---D---G 
+                                     &#x2191; 
+                                  master+HEAD
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/62">
+<p>the "right" way to pull down changes from the server</p>
+
+<ol>
+<li><code>stash</code> any uncommitted changes (if any)</li>
+<li><code>fetch</code> the latest refs and commits from origin</li>
+<li><code>rebase -p</code> your changes (if any) onto origin's head</li>
+<li>else, just fast-forward your head to match origin's</li>
+<li>un-<code>stash</code> any previously stashed changes</li>
+</ol>
+
+
+<p><p>
+<div class="smallercentered">
+<code>fetch</code> + <code>rebase</code> avoids unnecessary commits
+</div></p></p>
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/63">
+<p>Luckily, <code>git smart-pull</code> (part of the git-smart ruby gem) does all this for us</p>
+
+<pre>
+gem install git-smart
+</pre>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/64">
+<h1>Useful Git Tools</h1></div>
+</div><div class="slide" data-transition="none"><div class="content center" ref="one/01_slide/65">
+<h1>Git Tower</h1>
+
+<p>Costs $ but totally worth it</p>
+
+<div class="smallestcentered">
+tip: cmd-click a branch to unselect it and see the whole tree
+</div>
+
+
+
+
+<div class="smallestcentered">
+OSX only, if you're on another platform, try <a href="http://www.atlassian.com/software/sourcetree/overview">Atlassian's free SourceTree</a>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content center" ref="one/01_slide/66">
+<h1>Enhanced Shell Prompt</h1>
+
+<p><img src="./file/one/img/enhanced-prompt.png" alt="enhanced prompt"/></p>
+
+<div class="smallercentered">
+decorated with branch &amp; SHA
+</div>
+
+
+<div class="smallestcentered">
+check out <a href="https://peepcode.com/blog/2012/my-command-line-prompt">"my command line prompt"</a> by peepcode
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/67">
+<h1>git aliases</h1>
+
+<pre>
+[alias]
+  # nice one liner for status
+  st = status --short    
+
+
+  # remove files from index
+  unstage = reset HEAD
+</pre>
+
+
+
+
+<div class="smallestcentered">
+put these in your <code>~/.gitconfig</code>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/68">
+<h1>git aliases</h1>
+
+<pre>
+[alias]
+  # pretty ascii graph log format
+  l = log --graph --pretty='%Cred%h%Creset -%C(yellow)%d%Creset\
+          %s %Cblue[%an]%Creset %Cgreen(%cr)%Creset'\
+          --abbrev-commit --date=relative
+
+
+  # pretty log with all branches
+  la = !git l --all
+
+
+  # show just commits currently decorated by branch/tag pointers 
+  # really useful for high level picture
+  ld = !git l --all --simplify-by-decoration 
+</pre>
+
+
+
+
+<div class="smallestcentered">
+put these in your <code>~/.gitconfig</code>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/69">
+<h1>git aliases</h1>
+
+<pre>
+[alias]
+  # all commits unreachable via branch, tag, or child commit
+  # ignores anything pointed to by the reflog 
+  # so it displays all commits in jeopardy of garbage collection
+  loose-commits = !"for SHA in $(git fsck --unreachable\ 
+                  --no-reflogs | grep commit |\
+                  cut -d\\  -f 3); do git log -n 1 $SHA; done"
+</pre>
+
+
+
+
+<div class="smallestcentered">
+put these in your <code>~/.gitconfig</code>
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/70">
+<h1>omglog</h1>
+
+<p>OSX only&#x2026;watches file system for changes &amp; auto updates ascii graph log</p>
+
+<pre>
+gem install omglog
+</pre>
+
+
+
+
+<div class="smallestcentered">
+currently requires ruby 1.9.X
+</div>
+
+
+</div>
+</div><div class="slide" data-transition="none"><div class="content" ref="one/01_slide/71">
+<h1>Questions?</h1></div>
+</div></div>
+
+</body>
+</html>
