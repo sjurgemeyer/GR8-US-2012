@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<projectSuggestions>
+<declaringtype type="java.lang.Integer">
+<property isActive="false" isStatic="false" name="yd" type="ex1_distances.Distance">
+<doc/>
+</property>
+</declaringtype>
+</projectSuggestions>
