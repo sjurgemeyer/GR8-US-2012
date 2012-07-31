@@ -1,0 +1,17 @@
+package ex1_distances
+
+contribute (currentType(subType(Number)) | currentType("ex1_distances.Distance")) {
+	provider = "Distances DSL"
+	[ m: "meter",  yd: "yard",  cm: "centimerter",  mi: "mile",  km: "kilometer" ].each { propName, readableName ->
+		property name:propName, type:"ex1_distances.Distance", declaringType:"ex1_distances.DistanceCategory", doc:makeDoc(readableName)
+	}
+}
+
+def makeDoc(readableName) {
+	"""A <code>readableName</code> from <a href=\"http://joesgroovyblog.blogspot.com/2007/09/and-miles-to-go-before-i-sleep.html\">
+	http://joesgroovyblog.blogspot.com/2007/09/and-miles-to-go-before-i-sleep.html</a>
+	Based on {@link ex1_distances.DistanceCategory}
+	@since version 1.0
+	@see ex1_distances.DistanceCategory
+	"""
+} 

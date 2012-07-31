@@ -1,0 +1,99 @@
+package ex2_transactions;
+//// STEP 1 : support for transaction method
+//contribute(currentType(annotatedBy('ex2_transactions.Transactable'))) {
+//	method  name: 'transaction', params:[op: Closure, rollbackOnException:Boolean, kind:'ex2_transactions.TransactionKind']
+//}
+
+//// STEP 2 : named and optional parameters
+//contribute(currentType(annotatedBy('ex2_transactions.Transactable'))) {
+//	method  name: 'transaction', params:[op: Closure], 
+//		optionalParams:[rollbackOnException:Boolean], 
+//		namedParams:[kind:'ex2_transactions.TransactionKind']
+//}
+
+
+//// STEP 3 : support TransactionManager methods inside of transactions
+//def isTransactionable = currentType(annotatedBy(name('ex2_transactions.Transactable') &
+//	hasAttribute(name('value') & bind(types : value()))))
+//
+//contribute(isTransactionable) {
+//	method  name: 'transaction', params:[op: Closure], 
+//		optionalParams:[rollbackOnException:Boolean],
+//		namedParams:[kind:'ex2_transactions.TransactionKind']
+//}
+//
+//def inTransactionClosure = isTransactionable & enclosingClosure() & enclosingCallName('transaction')
+//
+//contribute(inTransactionClosure) {
+//	types.each {
+//		delegatesTo type:it
+//	} 
+//}
+
+
+
+//// STEP 4 : Special support for 'prompt' and 'status' methods
+//def isTransactionable = currentType(annotatedBy(name('ex2_transactions.Transactable') &
+//	hasAttribute(name('value') & bind(types : value()))))
+//
+//def inTransactionClosure = isTransactionable & enclosingClosure() & enclosingCallName('transaction')
+//
+//contribute(isTransactionable) {
+//	method  name: 'transaction', params:[op: Closure], optionalParams:[rollbackOnException:Boolean],
+//		namedParams:[kind:'ex2_transactions.TransactionKind']
+//}
+//
+//contribute(inTransactionClosure) {
+//	types.each {
+//		delegatesTo type:it, except: ['prompt', 'status']
+//	}
+//}
+//
+//contribute(inTransactionClosure & enclosingCall(hasArgument(name('kind') & bind(kinds : value())))) {
+//	kinds.each {
+//		if (it == 'ex2_transactions.TransactionKind.INTERACTIVE' || it == 'INTERACTIVE') {
+//			method name:'prompt', declaringType: 'ex2_transactions.TransactionManager', params:[msg:String], type:Object
+//		} else if (it == 'ex2_transactions.TransactionKind.LONG_RUNNING' || it == 'LONG_RUNNING') {
+//			method name:'status', declaringType: 'ex2_transactions.TransactionManager', params:[msg:String], type: void
+//		}
+//	}
+//}
+
+
+// FINAL : add providers and documentation
+def isTransactionable = currentType(annotatedBy(name('ex2_transactions.Transactable') &
+	hasAttribute(types : value())))
+
+def inTransactionClosure = enclosingClosure() & enclosingCallName('transaction') & isTransactionable
+
+contribute(isTransactionable) {
+	provider = "transaction manager DSL"
+	method  name: 'transaction', params:[op: Closure], optionalParams:[rollbackOnException:Boolean],
+		namedParams:[kind:'ex2_transactions.TransactionKind'], doc:"""
+		A transaction
+		@since 1.0
+		@author Andrew Eisenberg
+		"""
+}  
+
+contribute(inTransactionClosure) {
+	provider = "transaction manager DSL"
+	types.each {
+		delegatesTo type:it, except: ['prompt', 'status']
+	}
+}
+
+contribute(inTransactionClosure & enclosingCall(hasArgument(name('kind') & bind(kinds : value())))) {
+	provider = "transaction manager DSL"
+	kinds.each {
+		if (it == 'ex2_transactions.TransactionKind.INTERACTIVE' || it == 'INTERACTIVE') {
+			method name:'prompt', declaringType: 'ex2_transactions.TransactionManager', params:[msg:String], type:Object, doc:"""
+			Only applicable inside of {@link TransactionKind#INTERACTIVE} transactions
+			"""
+		} else if (it == 'ex2_transactions.TransactionKind.LONG_RUNNING' || it == 'LONG_RUNNING') {
+			method name:'status', declaringType: 'ex2_transactions.TransactionManager', params:[msg:String], doc: """
+			Only applicable inside of {@link TransactionKind#LONG_RUNNING} transactions
+			"""
+		}
+	}
+} 
