@@ -1,0 +1,85 @@
+
+//demo.Person.findOrSaveWhere(lastName:'Cruise', firstName:'Tom')
+
+
+POST http://localhost:8080/jaxrs/api/person
+Content Type: application/xml
+Accept: application/xml
+
+<person>
+  <firstName>Sam</firstName>
+  <lastName>Hill</lastName>
+</person>
+
+
+Respects accept, so you can send it XML and receive JSON answer...
+
+
+
+//conversions
+
+grails.converters.xml.default.deep = true
+
+http://localhost:8080/json-rest-api
+
+Has some nice features, including 
+
+Plugin: http://grails.org/plugin/json-rest-api
+
+SRC: http://grails.org/plugin/json-rest-api
+
+
+Originally created for EXT-JS Intergration 
+
+
+Issues:  
+    Does not support relations POST / PUTS
+    Author seemed to start another effort, restful GORM
+
+
+
+
+
+https://github.com/padcom/grails-restful-gorm-examples
+
+Challenges in creating RESTFul APIs
+
+
+Format to use, how to communicate errors to developer? 
+
+How to control
+
+How to control how many things are returned.  
+
+Search?  
+
+How to link two resources?  
+
+
+Future Directions: 
+
+    API Versioning 
+    Caching
+
+    Ability to override more stuff, i.e. delete vs disable
+
+
+withFormat
+
+
+
+    Marshalles Plugin
+http://grails.org/plugin/marshallers
+
+
+    http://github.com/pedjak/grails-marshallers
+
+        Exposes Named Configurations
+
+
+http://jwicz.wordpress.com/2011/07/11/grails-custom-xml-marshaller/
+
+
+
+By Robert Fletcher
+http://adhockery.blogspot.com/2009/08/json-rendering-your-classes.html
