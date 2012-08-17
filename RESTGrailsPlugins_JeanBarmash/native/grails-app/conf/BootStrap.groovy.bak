@@ -1,0 +1,23 @@
+import grails.converters.*  
+
+class BootStrap {
+
+    def init = { servletContext ->
+
+        JSON.registerObjectMarshaller(demo.Person) {
+                def returnVal = [:]
+                returnVal['first'] = it.lastName
+                returnVal['last'] = it.firstName
+                returnVal['id'] = it.id
+                return returnVal
+        } 
+
+
+
+
+
+
+    }
+    def destroy = {
+    }
+}
